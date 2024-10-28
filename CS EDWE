@@ -1,0 +1,40 @@
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+
+waveform_size = 100
+frequency = 0.5
+amplitude = 5.0
+direction_angle = np.pi / 4
+total_time_hours = 24
+time_steps = 240
+
+time_interval = total_time_hours / time_steps
+
+x = torch.linspace(-waveform_size // 2, waveform_size // 2, waveform_size)
+y = torch.linspace(-waveform_size // 2, waveform_size // 2, waveform_size)
+X, Y = torch.meshgrid(x, y)
+
+def infinite_waveform(t):
+    return amplitude * torch.cos(2 * np.pi * frequency * (X * torch.cos(torch.tensor(direction_angle)) + Y * torch.sin(torch.tensor(direction_angle))) + 2 * np.pi * t)
+
+wealth_data = torch.rand(waveform_size, waveform_size)
+total_wealth_energy = wealth_data ** 2
+
+noise_mask = torch.randn(waveform_size, waveform_size)
+protected_wealth_energy = total_wealth_energy + noise_mask
+
+wealth_energy_per_time = protected_wealth_energy / time_steps
+
+infinite_signal = torch.zeros(waveform_size, waveform_size)
+for t in range(time_steps):
+    wave = infinite_waveform(t * time_interval)
+    infinite_signal += wave * wealth_energy_per_time
+
+plt.figure(figsize(8, 6))
+plt.imshow(infinite_signal.numpy(), cmap='plasma', origin='lower')
+plt.title("CS w/ EDWE")
+plt.colorbar(label='Signal Intensity')
+plt.xlabel('X Axis')
+plt.ylabel('Y Axis')
+plt.show()
