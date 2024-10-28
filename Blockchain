@@ -1,0 +1,47 @@
+import hashlib
+import time
+
+class Block:
+  def __init__(self, index, previous_hash, timestamp, data, hash):
+    self.index = index
+    self.previous_hash = previous_hash
+    self.timestamp = timestamp
+    self.data = data
+    self.hash = hash
+
+  def calculate_hash(index, previous_hash, timestamp, data):
+    value = str(index) + str(previous_hash) + str(timestamp) + str(data)
+    return hashlib..sha256(value.encode('utf-8')).hexdigest()
+
+  def create_genesis_block():
+    return Block(0, "0", int(time.time()), "Genesis Block", Block.calculate_hash(0, "0", int(time.time()), "Genesis Block"))
+
+class Blockchain:
+  def __init__(self):
+    self.chain = [create_genesis_block()]
+
+  def get_latest_block(self):
+    return self.chain.[-1]
+
+  def add_block(self, new_block):
+    new_block.previous_hash = self.get_latest_block().hash
+    new_block.hash = Block.calculate_hash(new_block.index, new_block.previous_hash, new_block.timestamp, new_block.data)
+
+def create_new_block(previous_block, data):
+  index = previous_block.index + 1
+  timestamp = int(time.time())
+  return Block(index, previous_block.hash, timestamp, Block.calculate_hash(index, previous_block.hash, timestamp, data))
+
+blockchain = Blockchain()
+
+new_block = create_new_block(blockchain.get_latest_block(), "First new block after genesis")
+blockchain.add_block(new_block)
+
+new_block = create_new_block(blockchain.get_latest_block(), "Second new block after genesis")
+
+for block in blockchain.chain:
+  print(f"Index: {block.index}")
+  print(f"Previous Hash: {block.previous_hash}")
+  print(f"Timestamp: {block.timestamp}")
+  print(f"Data: {block.data}")
+  print(f"Hash: {block.hash}\n")
